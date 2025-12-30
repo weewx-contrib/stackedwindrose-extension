@@ -1,0 +1,62 @@
+v3.0.2
+*   fix error due to deprecated PIL.ImageDraw.textsize() method being removed
+    from PIL 10.0
+v3.0.1
+*   fixed issue with changed max() behaviour under python3
+v3.0.0
+*   now WeeWX3.2+/4.x python 2.7/3.x compatible
+*   renamed generator python file and various classes, methods and variables
+*   reformatted image generator python code to remove numerous long lines
+*   revised/merged python code with WeeWX-WD stacked windrose generator to
+    create a common code base
+*   reworked color validation/processing code
+*   changed 'period' config option to 'time_length' for follow WeeWX standard
+*   reworked skip_this_plot() logic
+*   moved some previously separate utility functions into
+    class StackedWindRoseImageGenerator
+v2.1.1
+*   now respects log_success and log_failure config options
+*   minor reformatting/typos
+
+v2.1.0
+*   fixed error resulting from change to class reportengine.ReportGenerator
+    signature introduced in weeWX 3.7.0
+*   added weeWX version check to installer
+*   revised imageStackedWindRose.py comments
+
+v2.0.2
+*   reworked imports to use PIL if available
+*   updated readme/readme.txt
+
+v2.0.1
+*   fixed typo in readme install instructions
+
+v2.0.0
+*   packaged as a standalone weewx extension
+*   added unit conversion for wind speed (seems it only ever used the archive
+    units)
+*   restructured the ImageStackedWindRoseGenerator class
+*   removed a number of unused imports and properties
+*   various formatting changes, mainly shortening of variable/property names
+
+v1.2.0
+*   revised for Weewx v3.2.0
+*   fixed issue whereby a fatal error was thrown if imageStackedWindRose3
+    could not find the font specified in skin.conf. Error is now trapped and a
+    default system font used instead.
+
+v1.0.0
+*   rewritten for Weewx v3.0.0
+
+v0.9.3
+*   fixed issue that arose with Weewx 2.6.3 now allowing use of UTF-8
+    characters in plots
+*   fixed logic error in code that calculates size of windrose 'petals'
+*   removed unnecessary import statements
+*   tweaked windrose size calculations to better cater for labels on plot
+
+v0.9.1
+*   revised version number to align with Weewx-WD version numbering
+
+v0.1.0
+*   initial implementation
