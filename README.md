@@ -18,6 +18,7 @@
 > BECAUSE THERE ARE LEGACY USERS OF THIS EXTENSION.
 >
 
+```
 # -----------------------------------
 # original readme follows
 # ------------------------------------
@@ -532,3 +533,4 @@ Manual Uninstallation
     or
 
     $ sudo systemctl restart weewx
+```
