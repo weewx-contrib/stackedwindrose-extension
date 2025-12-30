@@ -5,7 +5,9 @@
 >       dated July 8 2023 with no changes other than this readme
 >
 > to install:
->   weectl extension install https://github.com/wee-contrib/stackedwindrose-extension/archive/refs/heads/main.zip
+>
+>   weectl extension install \
+>     https://github.com/weewx-contrib/stackedwindrose-extension/archive/refs/heads/main.zip
 >
 
 
