@@ -1,3 +1,7 @@
+v3.1.0   -Tom Keffer
+*   added a `stop_event` parameter for compatiblity with WeeWX V5.5.
+*   no longer requires distutils
+
 v3.0.2
 *   fix error due to deprecated PIL.ImageDraw.textsize() method being removed
     from PIL 10.0

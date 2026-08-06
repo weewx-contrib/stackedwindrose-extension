@@ -10,9 +10,11 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 Installer for StackedWindRose Image Generator Extension
 
-Version: 3.0.2                                      Date: 6 July 2023
+Version: 3.1.0                                      Date: 6 August 2026
 
 Revision History
+    6 August 2026       v3.1.0
+        -   version change only
     6 July 2023         v3.0.2
         -   version change only
     7 June 2020         v3.0.1
@@ -40,23 +42,21 @@ Revision History
         -   Initial implementation
 """
 
-# python imports
-from distutils.version import StrictVersion
-
 # WeeWX imports
 import weewx
+from weeutil.weeutil import natural_compare
 
-from setup import ExtensionInstaller
+from weecfg.extension import ExtensionInstaller
 
 REQUIRED_VERSION = "3.2.0"
-STACKEDWINDROSE_VERSION = "3.0.2"
+STACKEDWINDROSE_VERSION = "3.1.0"
 
 def loader():
     return StackedWindRoseInstaller()
 
 class StackedWindRoseInstaller(ExtensionInstaller):
     def __init__(self):
-        if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_VERSION):
+        if natural_compare(weewx.__version__, REQUIRED_VERSION) < 0:
             msg = "%s requires WeeWX %s or greater, found %s" % (''.join(('StackedWindRose ', STACKEDWINDROSE_VERSION)),
                                                                  REQUIRED_VERSION,
                                                                  weewx.__version__)
