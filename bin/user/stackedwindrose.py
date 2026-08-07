@@ -120,7 +120,7 @@ DEFAULT_PETAL_COLORS = ['lightblue', 'blue', 'midnightblue', 'forestgreen',
 class StackedWindRoseImageGenerator(weewx.reportengine.ReportGenerator):
     """Generate a polar wind rose plot image."""
 
-    def __init__(self, config_dict, skin_dict, gen_ts, first_run, stn_info, record=None):
+    def __init__(self, config_dict, skin_dict, gen_ts, first_run, stn_info, record=None, stop_event=None):
         # initialize my superclass
         super(StackedWindRoseImageGenerator, self).__init__(config_dict,
                                                             skin_dict,

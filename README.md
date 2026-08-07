@@ -1,5 +1,26 @@
 
 >[!NOTE]
+> WeeWX 5.5 introduced a change that breaks the old 3.0.2 version of this extension.
+>
+> Users of python 3.12 or later need a couple extra steps to install this extension.
+>
+
+```
+Users running WeeWX v5.5 and later should use this repo.  It adds the new required flag to __init__
+and simply ignores whether WeeWX has passed a shutdown signal or not.
+
+Users running WeeWX v5.5 and later should use the tagged legacy 3.0.2 version of this repo.
+
+For both versions running python 3.12 or later, be sure to:
+   * pip3 install setuptools  (or apt install python3-setuptools)
+   * pip3 install six         (or apt install python3-six)
+
+```
+
+----
+
+>[!NOTE]
+> (Previous Note)
 >
 > this is stackedwindrose 3.0.2 by Gary Roderick
 >       dated July 8 2023 with no changes other than this readme

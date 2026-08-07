@@ -10,9 +10,11 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 Installer for StackedWindRose Image Generator Extension
 
-Version: 3.0.2                                      Date: 6 July 2023
+Version: 3.1.0                                      Date: 7 August 2026
 
 Revision History
+    7 August 2026       v3.1.0
+        -   change to __init__ for weewx 5.5
     6 July 2023         v3.0.2
         -   version change only
     7 June 2020         v3.0.1
@@ -49,7 +51,7 @@ import weewx
 from setup import ExtensionInstaller
 
 REQUIRED_VERSION = "3.2.0"
-STACKEDWINDROSE_VERSION = "3.0.2"
+STACKEDWINDROSE_VERSION = "3.1.0"
 
 def loader():
     return StackedWindRoseInstaller()
