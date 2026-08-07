@@ -1,3 +1,6 @@
+V3.1.0
+*   added stop_event parameter to __init__ for weewx 5.5 and later
+*   minor readme changes
 v3.0.2
 *   fix error due to deprecated PIL.ImageDraw.textsize() method being removed
     from PIL 10.0
