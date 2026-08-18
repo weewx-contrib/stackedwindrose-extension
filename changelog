@@ -1,3 +1,5 @@
+v3.2.1
+*   change ExtensionInstaller import
 v3.2.0
 *   the wind rose generator now honours the stop event weewx 5.5 and later
     hand to report generators, so weewxd no longer waits for the remaining
