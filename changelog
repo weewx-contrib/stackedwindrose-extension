@@ -1,3 +1,20 @@
+v3.2.0
+*   the wind rose generator now honours the stop event weewx 5.5 and later
+    hand to report generators, so weewxd no longer waits for the remaining
+    plots to be drawn when it is asked to shut down
+*   confirmed the weewx 5.5 __init__ change works under earlier weewx
+    releases as well, one version of this extension now covers all of them
+*   the installer no longer uses distutils, which python 3.12 removed, so
+    setuptools need not be installed to install this extension
+*   the extension no longer requires the six package, the last of its python
+    2 support; it is now python 3 only
+*   removed the compatibility shims that only ever covered python 2 or weewx
+    3 and are now dead code: the PIL 1.x import fallback, the syslog logging
+    fallback and the pre 3.9.0 search_up import; python 3 super()
+*   the installer now requires weewx 4.0.0 rather than 3.2.0.  weewx 4.0.0 is
+    the first release ported to python 3, and the reportengine.ReportGenerator
+    signature this extension has used since v2.1.0 arrived in weewx 3.7.0, so
+    nothing earlier could run it in any case
 V3.1.0
 *   added stop_event parameter to __init__ for weewx 5.5 and later
 *   minor readme changes
@@ -7,7 +24,8 @@ v3.0.2
 v3.0.1
 *   fixed issue with changed max() behaviour under python3
 v3.0.0
-*   now WeeWX3.2+/4.x python 2.7/3.x compatible
+*   now WeeWX3.2+/4.x python 2.7/3.x compatible (superseded in v3.2.0, which
+    is python 3 and weewx 4.0.0 or later)
 *   renamed generator python file and various classes, methods and variables
 *   reformatted image generator python code to remove numerous long lines
 *   revised/merged python code with WeeWX-WD stacked windrose generator to

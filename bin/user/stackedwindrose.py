@@ -12,9 +12,23 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-Version: 3.0.2                                          Date: 6 July 2023
+Version: 3.2.0                                          Date: 18 August 2026
 
 Revision History
+  18 August 2026        v3.2.0
+      - now honours the stop event WeeWX 5.5 and later hand to report
+        generators, abandoning any remaining plots when weewxd is shutting
+        down
+      - no longer requires the six package; it was used for a single
+        isinstance() check, and python 3.12 and later do not install it as a
+        matter of course
+      - python 3 only, which makes WeeWX 4.0.0 the earliest usable release
+      - removed the compatibility shims that only ever covered python 2 or
+        WeeWX 3: the PIL 1.x import fallback, the syslog logging fallback and
+        the pre v3.9.0 search_up import
+  7 August 2026         v3.1.0
+      - accept the stop_event argument WeeWX 5.5 and later pass to report
+        generators
   6 July 2023           v3.0.2
       - fix error due to deprecated PIL.ImageDraw.textsize() method being
         removed from PIL 10.0
@@ -25,7 +39,8 @@ Revision History
       - reformatting to remove numerous long lines
       - reformat of these comments
       - introduced class UniDraw allow use of fonts that don't support unicode
-      - WeeWX 3.2+/4.x python2/3 compatible
+      - WeeWX 3.2+/4.x python2/3 compatible (superseded in v3.2.0, which is
+        python 3 and WeeWX 4.0.0 or later)
       - now respects log_success and log_failure config options
       - reworked color validation code
       - changed period config setting to time_length to align with WeeWX norms
@@ -60,20 +75,12 @@ Previous Bitbucket revision history
 
 # python imports
 import datetime
+import logging
 import math
 import os.path
 import time
-# attempt to import image manipulation libraries from PIL, if not available
-# revert to the native python imaging module
-try:
-    from PIL import Image, ImageColor, ImageDraw
-except ImportError:
-    import Image
-    import ImageColor
-    import ImageDraw
-
-# python 2/3 compatibility shims
-import six
+# image manipulation libraries
+from PIL import Image, ImageColor, ImageDraw
 
 # WeeWX imports
 import weeutil.weeutil
@@ -81,34 +88,18 @@ import weewx.reportengine
 import weewx.units
 
 from weeplot.utilities import get_font_handle
-# search_up was moved from weeutil.weeutil to weeutil.config in v3.9.0, so we
-# need to try each until we find it
-try:
-    from weeutil.config import search_up
-except ImportError:
-    from weeutil.weeutil import search_up
+from weeutil.config import search_up
 
-# import/setup logging, WeeWX v3 is syslog based but WeeWX v4 is logging based,
-# try v4 logging and if it fails use v3 logging
-try:
-    # WeeWX4 logging
-    import logging
-    log = logging.getLogger(__name__)
+# logging.  The syslog based logging WeeWX 3 used is gone with it, WeeWX 4 and
+# later are logging based.
+log = logging.getLogger(__name__)
 
-    def loginf(msg):
-        log.info(msg)
 
-except ImportError:
-    # WeeWX legacy (v3) logging via syslog
-    import syslog
+def loginf(msg):
+    log.info(msg)
 
-    def logmsg(level, msg):
-        syslog.syslog(level, 'stackedwindrose: %s' % msg)
 
-    def loginf(msg):
-        logmsg(syslog.LOG_INFO, msg)
-
-STACKED_WINDROSE_VERSION = '3.0.2'
+STACKED_WINDROSE_VERSION = '3.2.0'
 DEFAULT_PETAL_COLORS = ['lightblue', 'blue', 'midnightblue', 'forestgreen',
                         'limegreen', 'green', 'greenyellow']
 
@@ -122,12 +113,16 @@ class StackedWindRoseImageGenerator(weewx.reportengine.ReportGenerator):
 
     def __init__(self, config_dict, skin_dict, gen_ts, first_run, stn_info, record=None, stop_event=None):
         # initialize my superclass
-        super(StackedWindRoseImageGenerator, self).__init__(config_dict,
-                                                            skin_dict,
-                                                            gen_ts,
-                                                            first_run,
-                                                            stn_info,
-                                                            record)
+        super().__init__(config_dict, skin_dict, gen_ts, first_run, stn_info,
+                         record)
+        # WeeWX 5.5 and later pass a threading.Event that is set when weewxd is
+        # shutting down; a report generator is expected to stop as soon as it
+        # can.  Save it ourselves rather than passing it to our superclass:
+        # only the WeeWX 5.5 and later superclass accepts it, and this
+        # extension still supports earlier WeeWX releases.  Those earlier
+        # releases pass no event at all, leaving this None, which we read as
+        # 'keep going'.
+        self.stop_event = stop_event
         # do we log on success
         self.log_success = weeutil.weeutil.to_bool(search_up(self.skin_dict,
                                                              'log_success',
@@ -230,6 +225,24 @@ class StackedWindRoseImageGenerator(weewx.reportengine.ReportGenerator):
         # generate any images
         self.gen_images(self.gen_ts)
 
+    def stopping(self, plot_name):
+        """Has weewxd asked us to stop?
+
+            Returns True if WeeWX has set the stop event, in which case the
+            plot named should not be generated and we should return to our
+            caller as soon as we can.  Returns False if we have not been asked
+            to stop, including under WeeWX releases earlier than 5.5, which
+            have no such event.
+
+            plot_name: Name of the plot we are about to work on, used in the
+                       log entry that records why generation stopped.
+        """
+
+        if self.stop_event is not None and self.stop_event.is_set():
+            loginf("Stop event set, abandoning generation of plot '%s'" % plot_name)
+            return True
+        return False
+
     def gen_images(self, gen_ts):
         """Generate any images.
 
@@ -248,6 +261,10 @@ class StackedWindRoseImageGenerator(weewx.reportengine.ReportGenerator):
         for timespan in self.image_dict.sections:
             # iterate over all plot names in this time span class
             for plotname in self.image_dict[timespan].sections:
+                # stop now if WeeWX is shutting down, the remaining plots can
+                # wait until the next report cycle
+                if self.stopping(plotname):
+                    return
                 # accumulate all options from parent nodes
                 plot_options = weeutil.weeutil.accumulateLeaves(self.image_dict[timespan][plotname])
                 # get a db manager for the database archive
@@ -296,6 +313,12 @@ class StackedWindRoseImageGenerator(weewx.reportengine.ReportGenerator):
                         raise
                 # iterate over each 'line' to be added to the plot.
                 for line_name in self.image_dict[timespan][plotname].sections:
+                    # A plot may carry several lines and each is drawn in
+                    # full, so check again before starting another one.  Return
+                    # rather than break, the part drawn image must not be
+                    # saved.
+                    if self.stopping(plotname):
+                        return
                     # accumulate options from parent nodes.
                     line_options = weeutil.weeutil.accumulateLeaves(self.image_dict[timespan][plotname][line_name])
 
@@ -907,7 +930,7 @@ def parse_color(color, default=None):
     except ValueError:
         # getrgb() could not parse the string, perhaps it is because color is
         # in the format 0xBBGGRR
-        if isinstance(color, six.string_types) and color.startswith('0x'):
+        if isinstance(color, str) and color.startswith('0x'):
             # we have a string that starts with '0x', try to convert it to an
             # int
             try:
