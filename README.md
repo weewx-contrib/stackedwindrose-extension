@@ -2,18 +2,27 @@
 >[!NOTE]
 > WeeWX 5.5 introduced a change that breaks the old 3.0.2 version of this extension.
 >
-> Users of python 3.12 or later need a couple extra steps to install this extension.
+> This version needs WeeWX 4.0.0 or later and python 3.  Nothing else to install.
 >
 
 ```
-Users running WeeWX v5.5 and later should use this repo.  It adds the new required flag to __init__
-and simply ignores whether WeeWX has passed a shutdown signal or not.
+Use this repo on every WeeWX release from 4.0.0 on, 5.5 included.  WeeWX 5.5 hands
+report generators a shutdown flag, which this version accepts and honours: asked to stop part way through
+a report, the generator abandons the plots it has not drawn yet rather than finishing
+every one of them first.  Earlier WeeWX releases pass no such flag, and the generator
+draws every plot just as it always has.
 
-Users running WeeWX v5.5 and later should use the tagged legacy 3.0.2 version of this repo.
+The tagged legacy 3.0.2 version is kept for the record only.  It fails under WeeWX 5.5.
 
-For both versions running python 3.12 or later, be sure to:
-   * pip3 install setuptools  (or apt install python3-setuptools)
-   * pip3 install six         (or apt install python3-six)
+Requirements: WeeWX 4.0.0 or greater, python 3, and Pillow, which WeeWX already needs
+for its own plots.  Nothing else.  Earlier versions of this extension needed setuptools
+(for distutils, which python 3.12 removed) and six; this one uses neither.
+
+The installer used to ask for WeeWX 3.2.0, which was never right: the
+reportengine.ReportGenerator signature this extension has used since v2.1.0 in 2017
+arrived in WeeWX 3.7.0, and this version is python 3 only, which rules out every WeeWX
+3.x — WeeWX 4.0.0 was the first release ported to python 3.  The "Pre-Requisites" line
+in the original readme below is left as it was written.
 
 ```
 
@@ -35,7 +44,9 @@ For both versions running python 3.12 or later, be sure to:
 >[!CAUTION]
 >
 >   The paths below pointing to Gary's old github URLs are no longer valid.
->   Gary left github in early June 2025.
+>   Gary left github in early June 2025.  The 3.0.2 package names and the
+>   wee_extension commands in those instructions are equally out of date --
+>   install as shown in the note above.
 >
 > THIS IS AN UNMAINTAINED REPO SAVED FOR HISTORICAL PURPOSES
 > BECAUSE THERE ARE LEGACY USERS OF THIS EXTENSION.
@@ -54,7 +65,9 @@ a the windrose image based upon WeeWX archive data.
 
 Pre-Requisites
 
-WeeWX v3.2.0 or greater.
+WeeWX v4.0.0 or greater, and python 3.  (Updated for v3.2.0 of this extension.
+The 2023 original said WeeWX v3.2.0 or greater, back when this extension still
+ran under python 2.)
 
 File Locations
 

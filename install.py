@@ -10,9 +10,17 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 Installer for StackedWindRose Image Generator Extension
 
-Version: 3.1.0                                      Date: 7 August 2026
+Version: 3.2.0                                      Date: 18 August 2026
 
 Revision History
+    18 August 2026      v3.2.0
+        -   honour the stop event weewx 5.5 and later hand to report
+            generators
+        -   use weewx.require_weewx_version() for the version check rather
+            than distutils, which python 3.12 removed
+        -   python 3 only, so the required weewx version is now 4.0.0, the
+            first release ported to python 3
+        -   python 3 super()
     7 August 2026       v3.1.0
         -   change to __init__ for weewx 5.5
     6 July 2023         v3.0.2
@@ -42,28 +50,31 @@ Revision History
         -   Initial implementation
 """
 
-# python imports
-from distutils.version import StrictVersion
-
 # WeeWX imports
 import weewx
 
 from setup import ExtensionInstaller
 
-REQUIRED_VERSION = "3.2.0"
-STACKEDWINDROSE_VERSION = "3.1.0"
+# This extension is python 3 only, and WeeWX 4.0.0 is the first release
+# ported to python 3, so nothing earlier can run it.  (The other floor is
+# WeeWX 3.7.0, which introduced the reportengine.ReportGenerator signature
+# this extension has used since v2.1.0, but every WeeWX 3.x is python 2.)
+REQUIRED_VERSION = "4.0.0"
+STACKEDWINDROSE_VERSION = "3.2.0"
 
 def loader():
     return StackedWindRoseInstaller()
 
 class StackedWindRoseInstaller(ExtensionInstaller):
     def __init__(self):
-        if StrictVersion(weewx.__version__) < StrictVersion(REQUIRED_VERSION):
-            msg = "%s requires WeeWX %s or greater, found %s" % (''.join(('StackedWindRose ', STACKEDWINDROSE_VERSION)),
-                                                                 REQUIRED_VERSION,
-                                                                 weewx.__version__)
-            raise weewx.UnsupportedFeature(msg)
-        super(StackedWindRoseInstaller, self).__init__(
+        # Check we have a suitable WeeWX version.  Use WeeWX's own check,
+        # which every WeeWX release we support provides: distutils, which we
+        # used to compare versions with, was removed in python 3.12 and its
+        # absence stopped this installer before it could say anything useful.
+        weewx.require_weewx_version(''.join(('StackedWindRose ',
+                                             STACKEDWINDROSE_VERSION)),
+                                    REQUIRED_VERSION)
+        super().__init__(
             version=STACKEDWINDROSE_VERSION,
             name='StackedWindRose',
             description='Stacked windrose image generator for WeeWX.',
